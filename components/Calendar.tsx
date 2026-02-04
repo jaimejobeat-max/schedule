@@ -1,9 +1,11 @@
+
 "use client";
 
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
+import listPlugin from "@fullcalendar/list";
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 
@@ -31,6 +33,14 @@ const BRANCH_NAMES: Record<string, string> = {
 export default function Calendar() {
     const [events, setEvents] = useState([]);
     const calendarRef = useRef<FullCalendar>(null);
+    const [initialView, setInitialView] = useState("dayGridMonth");
+
+    useEffect(() => {
+        // Detect mobile and set initial view to list
+        if (window.innerWidth < 768) {
+            setInitialView("listMonth");
+        }
+    }, []);
 
     // Auto-refresh every 5 minutes (300,000 ms)
     useEffect(() => {
@@ -86,12 +96,12 @@ export default function Calendar() {
             <div className="calendar-container">
                 <FullCalendar
                     ref={calendarRef}
-                    plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
-                    initialView="dayGridMonth"
+                    plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin]}
+                    initialView={initialView}
                     headerToolbar={{
                         left: "prev,next today",
                         center: "title",
-                        right: "dayGridMonth,timeGridWeek",
+                        right: "dayGridMonth,timeGridWeek,listMonth",
                     }}
                     events={fetchEvents}
                     eventClick={handleEventClick}
