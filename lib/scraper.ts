@@ -175,7 +175,7 @@ export async function fetchSchedules(year: number, month: number) {
 
                         allEvents.push({
                             id: `${boardId}-${no}`,
-                            title: `[${boardId}] ${title}`,
+                            title: `[${boardId.replace(/Layer/i, '').replace('hannam', 'Hannam')}] ${title}`,
                             start: dateStr,
                             url: `https://${HOST}${BASE_PATH}/${viewHref}`,
                             extendedProps: { boardId },

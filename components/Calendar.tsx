@@ -21,13 +21,13 @@ const BRANCH_COLORS: Record<string, string> = {
 };
 
 const BRANCH_NAMES: Record<string, string> = {
-    Layer20: "Layer 20",
-    layer7: "Layer 7",
-    Layer41: "Layer 41",
-    Layer26: "Layer 26",
-    Layer27: "Layer 27",
-    Layer11: "Layer 11",
-    Layerhannam: "Layer Hannam",
+    Layer20: "20",
+    layer7: "7",
+    Layer41: "41",
+    Layer26: "26",
+    Layer27: "27",
+    Layer11: "11",
+    Layerhannam: "Hannam",
 };
 
 export default function Calendar() {
