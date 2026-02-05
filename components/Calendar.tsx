@@ -111,11 +111,38 @@ export default function Calendar() {
 
             <div className="calendar-container glass-calendar">
                 <style jsx global>{`
+                    /* Desktop styles */
                     .glass-calendar .fc-toolbar-title {
                         font-size: 1.25rem !important;
                         font-weight: 700 !important;
                         color: #1f2937 !important;
                     }
+
+                    /* Mobile styles */
+                    @media (max-width: 768px) {
+                        .glass-calendar .fc-toolbar {
+                            flex-wrap: wrap;
+                            gap: 0.5rem;
+                            justify-content: center !important;
+                        }
+                        .glass-calendar .fc-toolbar-title {
+                            font-size: 1rem !important;
+                            width: 100%;
+                            text-align: center;
+                            order: -1;
+                            margin-bottom: 0.5rem !important;
+                        }
+                        .glass-calendar .fc-toolbar-chunk {
+                            display: flex;
+                            justify-content: center;
+                            gap: 0.25rem;
+                        }
+                        .glass-calendar .fc-button {
+                            padding: 0.25rem 0.5rem !important;
+                            font-size: 0.8rem !important;
+                        }
+                    }
+
                     .glass-calendar .fc-button-primary {
                         background-color: rgba(255, 255, 255, 0.5) !important;
                         border-color: rgba(255, 255, 255, 0.4) !important;
@@ -140,6 +167,8 @@ export default function Calendar() {
                     ref={calendarRef}
                     plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin]}
                     initialView={initialView}
+                    titleFormat={{ year: 'numeric', month: '2-digit' }}
+                    listDayFormat={{ month: '2-digit', day: '2-digit', weekday: 'short' }}
                     headerToolbar={{
                         left: "prev,next today",
                         center: "title",
