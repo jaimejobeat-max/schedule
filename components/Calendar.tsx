@@ -104,8 +104,8 @@ export default function Calendar() {
                     <button
                         onClick={() => setSelectedBranch(null)}
                         className={`px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 text-xs font-bold tracking-wide ${selectedBranch === null
-                                ? "bg-gray-800 text-white border-gray-800 scale-105"
-                                : "bg-white/50 text-gray-600 border-white/40 hover:bg-white/80"
+                            ? "bg-gray-800 text-white border-gray-800 scale-105"
+                            : "bg-white/50 text-gray-600 border-white/40 hover:bg-white/80"
                             }`}
                     >
                         ALL
@@ -133,8 +133,9 @@ export default function Calendar() {
                         href="https://raysoda.cafe24.com/zeroboard/zboard.php?id=hong_schedule"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center px-4 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-sm font-bold rounded-lg shadow-md transition-all duration-200"
+                        className="inline-flex items-center justify-center px-4 py-2 text-sm font-bold text-gray-700 rounded-lg shadow-sm border border-white/40 transition-all duration-200 hover:opacity-80 active:scale-95"
                         style={{
+                            backgroundColor: '#A0C4FF', // Pastel Blue
                             height: '2.5rem', // Match standard button height
                             fontSize: '0.875rem', // Match standard button font size
                         }}
@@ -148,11 +149,16 @@ export default function Calendar() {
                 <style jsx global>{`
                     /* Desktop styles */
                     .glass-calendar .fc-toolbar-title {
-                        font-family: inherit !important; /* Match system/button font */
-                        font-size: 1.5rem !important; /* Slightly larger for emphasis */
-                        font-weight: 800 !important; /* Match bold buttons */
+                        font-family: inherit !important;
+                        font-size: 1.5rem !important;
+                        font-weight: 300 !important; /* Thin font */
                         color: #1f2937 !important;
                         letter-spacing: -0.025em;
+                        display: flex !important;
+                        align-items: center !important;
+                        height: 2.5rem !important; /* Match button height */
+                        margin: 0 !important;
+                        padding: 0 1rem !important; /* Add padding like buttons */
                     }
 
                     /* Mobile styles */
@@ -164,19 +170,31 @@ export default function Calendar() {
                         }
                         .glass-calendar .fc-toolbar-title {
                             font-size: 1.25rem !important;
-                            width: 100%;
+                            width: auto !important; /* Allow auto width to respect padding */
                             text-align: center;
                             order: -1;
                             margin-bottom: 0.5rem !important;
+                            justify-content: center; /* Center content */
+                            flex-grow: 0; /* Prevent taking full width if we want it button-like */
                         }
                         .glass-calendar .fc-toolbar-chunk {
                             display: flex;
                             justify-content: center;
                             gap: 0.25rem;
+                            width: 100%; /* Ensure chunks take row */
                         }
-                        .glass-calendar .fc-button {
-                            padding: 0.375rem 0.75rem !important; /* Enforce consistent padding */
-                            font-size: 0.8rem !important;
+                        /* First chunk (prev/next/today) and Third chunk (views) share row */
+                        .glass-calendar .fc-toolbar-chunk:first-child {
+                             justify-content: flex-end; /* Align closer to title if title is middle? No, keep logic simple */
+                             order: 2; /* Move chunks below title */
+                             width: auto;
+                        }
+                        .glass-calendar .fc-toolbar-chunk:last-child {
+                             order: 3;
+                             width: auto;
+                        }
+                        .glass-calendar .fc-toolbar-title {
+                            width: 100% !important; /* Keep full width for title on top row */
                         }
                     }
 
@@ -234,7 +252,7 @@ export default function Calendar() {
                                         if (todayEl) {
                                             todayEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                         }
-                                    }, 100);
+                                    }, 200);
                                 }
                             }
                         }
@@ -263,7 +281,7 @@ export default function Calendar() {
                                         nextSibling = nextSibling.nextElementSibling;
                                     }
                                 }
-                            }, 50);
+                            }, 300); // 300ms delay to ensure rendering matches
                         }
                     }}
                     height="auto"
