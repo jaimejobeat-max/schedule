@@ -35,6 +35,8 @@ export default function Calendar() {
     const calendarRef = useRef<FullCalendar>(null);
     const [initialView, setInitialView] = useState("dayGridMonth");
 
+    const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+
     useEffect(() => {
         // Detect mobile and set initial view to list
         if (window.innerWidth < 768) {
@@ -52,6 +54,11 @@ export default function Calendar() {
         return () => clearInterval(interval);
     }, []);
 
+    // Effect to refetch events when filter changes
+    useEffect(() => {
+        calendarRef.current?.getApi().refetchEvents();
+    }, [selectedBranch]);
+
     // Fetch events function for FullCalendar
     const fetchEvents = async (info: any, successCallback: any, failureCallback: any) => {
         try {
@@ -62,12 +69,17 @@ export default function Calendar() {
                 },
             });
 
-            const mappedEvents = response.data.map((evt: any) => ({
+            let mappedEvents = response.data.map((evt: any) => ({
                 ...evt,
                 backgroundColor: BRANCH_COLORS[evt.extendedProps.boardId] || "#cccccc",
                 borderColor: BRANCH_COLORS[evt.extendedProps.boardId] || "#cccccc",
                 textColor: "#000000", // Dark text for pastel background
             }));
+
+            // Filter logic
+            if (selectedBranch) {
+                mappedEvents = mappedEvents.filter((evt: any) => evt.extendedProps.boardId === selectedBranch);
+            }
 
             successCallback(mappedEvents);
         } catch (error) {
@@ -87,12 +99,31 @@ export default function Calendar() {
         <div className="p-4 md:p-6 bg-white/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl">
             {/* Header: Legend + Link Button */}
             <div className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                {/* Legend in Center/Left */}
+                {/* Legend (Filter Buttons) */}
                 <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                    <button
+                        onClick={() => setSelectedBranch(null)}
+                        className={`px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 text-xs font-bold tracking-wide ${selectedBranch === null
+                                ? "bg-gray-800 text-white border-gray-800 scale-105"
+                                : "bg-white/50 text-gray-600 border-white/40 hover:bg-white/80"
+                            }`}
+                    >
+                        ALL
+                    </button>
                     {Object.entries(BRANCH_COLORS).map(([id, color]) => (
-                        <div key={id} className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-white/40 shadow-sm" style={{ backgroundColor: color }}>
+                        <button
+                            key={id}
+                            onClick={() => setSelectedBranch(selectedBranch === id ? null : id)}
+                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 ${selectedBranch === id ? "ring-2 ring-offset-1 ring-gray-400 scale-105" : "hover:opacity-80"
+                                }`}
+                            style={{
+                                backgroundColor: color,
+                                borderColor: "rgba(255,255,255,0.4)",
+                                opacity: selectedBranch && selectedBranch !== id ? 0.4 : 1,
+                            }}
+                        >
                             <span className="text-xs font-bold text-gray-800 tracking-wide">{BRANCH_NAMES[id]}</span>
-                        </div>
+                        </button>
                     ))}
                 </div>
 
@@ -102,7 +133,11 @@ export default function Calendar() {
                         href="https://raysoda.cafe24.com/zeroboard/zboard.php?id=hong_schedule"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block px-4 py-2 bg-white/50 hover:bg-white/80 active:scale-95 text-sm font-bold text-gray-700 rounded-xl shadow-sm border border-white/40 transition-all duration-200"
+                        className="inline-flex items-center justify-center px-4 py-2 bg-blue-500 hover:bg-blue-600 active:bg-blue-700 text-white text-sm font-bold rounded-lg shadow-md transition-all duration-200"
+                        style={{
+                            height: '2.5rem', // Match standard button height
+                            fontSize: '0.875rem', // Match standard button font size
+                        }}
                     >
                         hongdae ↗
                     </a>
@@ -113,9 +148,11 @@ export default function Calendar() {
                 <style jsx global>{`
                     /* Desktop styles */
                     .glass-calendar .fc-toolbar-title {
-                        font-size: 1.25rem !important;
-                        font-weight: 700 !important;
+                        font-family: inherit !important; /* Match system/button font */
+                        font-size: 1.5rem !important; /* Slightly larger for emphasis */
+                        font-weight: 800 !important; /* Match bold buttons */
                         color: #1f2937 !important;
+                        letter-spacing: -0.025em;
                     }
 
                     /* Mobile styles */
@@ -126,7 +163,7 @@ export default function Calendar() {
                             justify-content: center !important;
                         }
                         .glass-calendar .fc-toolbar-title {
-                            font-size: 1rem !important;
+                            font-size: 1.25rem !important;
                             width: 100%;
                             text-align: center;
                             order: -1;
@@ -138,7 +175,7 @@ export default function Calendar() {
                             gap: 0.25rem;
                         }
                         .glass-calendar .fc-button {
-                            padding: 0.25rem 0.5rem !important;
+                            padding: 0.375rem 0.75rem !important; /* Enforce consistent padding */
                             font-size: 0.8rem !important;
                         }
                     }
@@ -148,6 +185,13 @@ export default function Calendar() {
                         border-color: rgba(255, 255, 255, 0.4) !important;
                         color: #374151 !important;
                         backdrop-filter: blur(4px);
+                        font-weight: 600 !important;
+                        text-transform: capitalize;
+                        border-radius: 0.5rem !important; /* More rounded like Hongdae button */
+                        height: 2.5rem !important; /* Consistent height */
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
                     }
                     .glass-calendar .fc-button-primary:hover {
                         background-color: rgba(255, 255, 255, 0.8) !important;
@@ -172,6 +216,7 @@ export default function Calendar() {
                     }
                 `}</style>
                 <FullCalendar
+                    key={initialView} /* Force remount on view change to ensure mobile default works */
                     ref={calendarRef}
                     plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin]}
                     initialView={initialView}
@@ -224,6 +269,10 @@ export default function Calendar() {
                     height="auto"
                     aspectRatio={1.5}
                 />
+            </div>
+            {/* Disclaimer / Footer */}
+            <div className="mt-4 text-center text-xs text-gray-500">
+                <p>Showing events for: {selectedBranch ? BRANCH_NAMES[selectedBranch] : "All Branches"}</p>
             </div>
         </div>
     );
