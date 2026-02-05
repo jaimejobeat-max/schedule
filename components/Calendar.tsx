@@ -202,13 +202,21 @@ export default function Calendar() {
                     events={fetchEvents}
                     eventClick={handleEventClick}
                     datesSet={(arg) => {
-                        // When switching to List view, verify if we need to scroll to today
+                        // When switching to List view, verify if we need to scroll to today and highlight events
                         if (arg.view.type === 'listMonth') {
                             setTimeout(() => {
-                                const todayEl = document.querySelector('.fc-list-day.fc-day-today');
-                                if (todayEl) {
-                                    // Only scroll if it's the first render or user specifically requested (checking session or state might be needed, but for now force scroll)
-                                    todayEl.scrollIntoView({ behavior: 'instant', block: 'center' });
+                                const todayHeader = document.querySelector('.fc-list-day.fc-day-today');
+                                if (todayHeader) {
+                                    // Scroll to today
+                                    todayHeader.scrollIntoView({ behavior: 'instant', block: 'center' });
+
+                                    // Highlight events under today
+                                    let nextSibling = todayHeader.nextElementSibling;
+                                    while (nextSibling && nextSibling.classList.contains('fc-list-event')) {
+                                        // Apply yellow background to the event row
+                                        (nextSibling as HTMLElement).style.backgroundColor = 'rgba(255, 235, 59, 0.3)';
+                                        nextSibling = nextSibling.nextElementSibling;
+                                    }
                                 }
                             }, 50);
                         }
