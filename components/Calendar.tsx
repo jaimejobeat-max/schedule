@@ -84,16 +84,58 @@ export default function Calendar() {
     };
 
     return (
-        <div className="p-4 bg-white rounded-lg shadow-lg">
-            <div className="mb-4 flex flex-wrap gap-2 justify-center">
-                {Object.entries(BRANCH_COLORS).map(([id, color]) => (
-                    <div key={id} className="flex items-center gap-1 px-2 py-1 rounded border" style={{ backgroundColor: color }}>
-                        <span className="text-xs font-semibold">{BRANCH_NAMES[id]}</span>
-                    </div>
-                ))}
+        <div className="p-4 md:p-6 bg-white/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl">
+            {/* Header: Legend + Link Button */}
+            <div className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                {/* Legend in Center/Left */}
+                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                    {Object.entries(BRANCH_COLORS).map(([id, color]) => (
+                        <div key={id} className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-white/40 shadow-sm" style={{ backgroundColor: color }}>
+                            <span className="text-xs font-bold text-gray-800 tracking-wide">{BRANCH_NAMES[id]}</span>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Right Link Button */}
+                <div className="flex-shrink-0">
+                    <a
+                        href="https://raysoda.cafe24.com/zeroboard/zboard.php?id=hong_schedule"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block px-4 py-2 bg-white/50 hover:bg-white/80 active:scale-95 text-sm font-bold text-gray-700 rounded-xl shadow-sm border border-white/40 transition-all duration-200"
+                    >
+                        hongdae ↗
+                    </a>
+                </div>
             </div>
 
-            <div className="calendar-container">
+            <div className="calendar-container glass-calendar">
+                <style jsx global>{`
+                    .glass-calendar .fc-toolbar-title {
+                        font-size: 1.25rem !important;
+                        font-weight: 700 !important;
+                        color: #1f2937 !important;
+                    }
+                    .glass-calendar .fc-button-primary {
+                        background-color: rgba(255, 255, 255, 0.5) !important;
+                        border-color: rgba(255, 255, 255, 0.4) !important;
+                        color: #374151 !important;
+                        backdrop-filter: blur(4px);
+                    }
+                    .glass-calendar .fc-button-primary:hover {
+                        background-color: rgba(255, 255, 255, 0.8) !important;
+                    }
+                    .glass-calendar .fc-button-active {
+                        background-color: rgba(255, 255, 255, 1) !important;
+                        color: #000 !important;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                    }
+                    .fc-event {
+                        border-radius: 6px !important;
+                        border: none !important;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+                    }
+                `}</style>
                 <FullCalendar
                     ref={calendarRef}
                     plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin, listPlugin]}
