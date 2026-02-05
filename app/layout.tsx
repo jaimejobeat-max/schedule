@@ -5,8 +5,26 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Multi-Branch Schedule Dashboard",
+    title: "LAYER STUDIOS",
     description: "Unified schedule view for 8 branches",
+    manifest: "/manifest.json",
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: "LAYER",
+    },
+    formatDetection: {
+        telephone: false,
+    },
+    viewport: {
+        width: "device-width",
+        initialScale: 1,
+        maximumScale: 1,
+    },
+};
+
+export const viewport = {
+    themeColor: "#ffffff",
 };
 
 export default function RootLayout({
