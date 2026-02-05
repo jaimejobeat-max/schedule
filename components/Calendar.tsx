@@ -162,6 +162,16 @@ export default function Calendar() {
                         border: none !important;
                         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
                     }
+                    /* Highlight today in list view */
+                    .glass-calendar .fc-list-day.fc-day-today {
+                        background-color: rgba(255, 235, 59, 0.3) !important; /* Soft Yellow Highlight */
+                        border-left: 4px solid #f59e0b !important; /* Amber accent */
+                    }
+                    .glass-calendar .fc-list-day.fc-day-today .fc-list-day-text,
+                    .glass-calendar .fc-list-day.fc-day-today .fc-list-day-side-text {
+                        color: #b45309 !important; /* Darker amber text */
+                        font-weight: 800 !important;
+                    }
                 `}</style>
                 <FullCalendar
                     ref={calendarRef}
