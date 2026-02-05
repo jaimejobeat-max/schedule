@@ -164,13 +164,11 @@ export default function Calendar() {
                     }
                     /* Highlight today in list view */
                     .glass-calendar .fc-list-day.fc-day-today {
-                        background-color: rgba(255, 235, 59, 0.3) !important; /* Soft Yellow Highlight */
-                        border-left: 4px solid #f59e0b !important; /* Amber accent */
+                        background-color: rgba(255, 235, 59, 0.5) !important;
                     }
-                    .glass-calendar .fc-list-day.fc-day-today .fc-list-day-text,
-                    .glass-calendar .fc-list-day.fc-day-today .fc-list-day-side-text {
-                        color: #b45309 !important; /* Darker amber text */
-                        font-weight: 800 !important;
+                    .glass-calendar .fc-list-day.fc-day-today > * {
+                        background-color: rgba(255, 235, 59, 0.5) !important;
+                        color: #1f2937 !important;
                     }
                 `}</style>
                 <FullCalendar
@@ -179,13 +177,42 @@ export default function Calendar() {
                     initialView={initialView}
                     titleFormat={{ year: 'numeric', month: '2-digit' }}
                     listDayFormat={{ month: '2-digit', day: '2-digit', weekday: 'short' }}
+                    customButtons={{
+                        customToday: {
+                            text: 'today',
+                            click: function () {
+                                const calendarApi = calendarRef.current?.getApi();
+                                if (calendarApi) {
+                                    calendarApi.today();
+                                    setTimeout(() => {
+                                        const todayEl = document.querySelector('.fc-day-today');
+                                        if (todayEl) {
+                                            todayEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        }
+                                    }, 100);
+                                }
+                            }
+                        }
+                    }}
                     headerToolbar={{
-                        left: "prev,next today",
+                        left: "prev,next,customToday",
                         center: "title",
-                        right: "dayGridMonth,timeGridWeek,listMonth",
+                        right: "dayGridMonth,dayGridWeek,listMonth",
                     }}
                     events={fetchEvents}
                     eventClick={handleEventClick}
+                    datesSet={(arg) => {
+                        // When switching to List view, verify if we need to scroll to today
+                        if (arg.view.type === 'listMonth') {
+                            setTimeout(() => {
+                                const todayEl = document.querySelector('.fc-list-day.fc-day-today');
+                                if (todayEl) {
+                                    // Only scroll if it's the first render or user specifically requested (checking session or state might be needed, but for now force scroll)
+                                    todayEl.scrollIntoView({ behavior: 'instant', block: 'center' });
+                                }
+                            }, 50);
+                        }
+                    }}
                     height="auto"
                     aspectRatio={1.5}
                 />
