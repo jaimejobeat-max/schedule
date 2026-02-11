@@ -108,14 +108,16 @@ export default function Calendar() {
         const url = info.event.url;
         if (!url) return;
 
-        // Calculate position
-        const rect = info.jsEvent.target.getBoundingClientRect();
-        // Position to the right of the event, or left if it's too close to the edge
-        let x = rect.right + 10;
+        // Use info.el which gives the main event element, ensuring we get the full box
+        const rect = info.el.getBoundingClientRect();
+
+        // Position to the right of the event
+        let x = rect.right + 15; // Increased padding slightly
         const y = rect.top;
 
+        // If it goes off screen on the right, switch to left
         if (x + 300 > window.innerWidth) {
-            x = rect.left - 310;
+            x = rect.left - 315;
         }
 
         setPreviewPosition({ x, y });
