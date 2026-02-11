@@ -235,11 +235,26 @@ export async function fetchScheduleDetail(url: string) {
             }
         });
 
-        // Extract text content (maybe first 200 chars)
-        // Heuristic: Remove scripts, styles, and grab text
+        // Extract text content with newlines
+        // Heuristic: Remove scripts, styles
         $('script').remove();
         $('style').remove();
-        const text = $('body').text().replace(/\s+/g, ' ').trim().substring(0, 200);
+
+        // Replace <br> with \n
+        $('br').replaceWith('\n');
+        // Replace block elements with \n around them if needed, but text() often joins with no space.
+        // Let's try to preserve whitespace intelligently.
+        // A simple approach:
+        $('div, p, tr').before('\n');
+
+        const rawText = $('body').text();
+        // Clean up excessive newlines
+        const text = rawText
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .join('\n')
+            .substring(0, 500); // Increase limit to show more context like in the screenshot
 
         return {
             imageUrl,

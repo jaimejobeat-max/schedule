@@ -151,25 +151,26 @@ export default function Calendar() {
             {/* Hover Preview Tooltip */}
             {previewPosition && (
                 <div
-                    className="fixed z-50 w-72 bg-white/90 backdrop-blur-md rounded-xl shadow-2xl border border-white/20 overflow-hidden transition-all duration-200"
+                    className="fixed z-50 w-80 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.3)] border border-yellow-200/50 overflow-hidden transition-all duration-200"
                     style={{
                         top: previewPosition.y,
                         left: previewPosition.x,
-                        pointerEvents: 'none', // Allow clicking through if needed, but mainly to prevent flickering
+                        backgroundColor: '#FFF9C4', // Light Yellow (Post-it style)
+                        pointerEvents: 'none',
                     }}
                 >
                     {isLoadingPreview ? (
-                        <div className="p-4 flex items-center justify-center text-gray-500 text-sm h-32">
-                            <svg className="animate-spin h-5 w-5 mr-2 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <div className="p-6 flex items-center justify-center text-gray-500 text-sm h-32 font-medium">
+                            <svg className="animate-spin h-5 w-5 mr-3 text-yellow-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
                             Loading preview...
                         </div>
                     ) : (
-                        <div>
+                        <div className="flex flex-col h-full">
                             {previewData?.imageUrl && (
-                                <div className="relative h-40 w-full bg-gray-100">
+                                <div className="relative h-48 w-full bg-yellow-50 border-b border-yellow-100/50">
                                     <img
                                         src={previewData.imageUrl}
                                         alt="Preview"
@@ -177,9 +178,9 @@ export default function Calendar() {
                                     />
                                 </div>
                             )}
-                            <div className="p-3">
-                                <p className="text-xs text-gray-700 line-clamp-4 leading-relaxed">
-                                    {previewData?.description || "No description available."}
+                            <div className="p-4 bg-[#FFF9C4]">
+                                <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed font-medium">
+                                    {previewData?.description || "No content found."}
                                 </p>
                             </div>
                         </div>
