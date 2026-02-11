@@ -192,3 +192,62 @@ export async function fetchSchedules(year: number, month: number) {
     await Promise.all(promises);
     return allEvents;
 }
+
+export async function fetchScheduleDetail(url: string) {
+    const cookie = await getSession();
+    if (!cookie) {
+        return null;
+    }
+
+    try {
+        // Extract relative path from full URL if needed, or just use path
+        // url is like https://raysoda.cafe24.com/zeroboard/view.php?id=...
+        const urlObj = new URL(url);
+        const path = urlObj.pathname + urlObj.search;
+
+        const { body } = await rawRequest('GET', path, null, cookie);
+        const html = iconv.decode(body, 'EUC-KR');
+        const $ = cheerio.load(html);
+
+        // Zeroboard content is usually in a specific table or div logic
+        // Based on typical zeroboard structure, keeping it generic:
+        // Look for images in the main content area (often distinct from header/footer)
+        // We'll search for images in typical content containers or just the whole body 
+        // but exclude known header/footer areas if possible.
+        // For now, simpler: find the first image in the whole body that looks like user content.
+
+        let imageUrl: string | null = null;
+
+        // Find all images
+        $('img').each((_, img) => {
+            if (imageUrl) return; // already found
+            const src = $(img).attr('src');
+            // Filter out common UI images (buttons, spacers, etc.)
+            if (src && !src.includes('button') && !src.includes('icon') && !src.includes('skin') && !src.includes('shim')) {
+                // Should be absolute URL
+                if (src.startsWith('http')) {
+                    imageUrl = src;
+                } else if (src.startsWith('/')) {
+                    imageUrl = `https://${HOST}${src}`;
+                } else {
+                    imageUrl = `https://${HOST}${BASE_PATH}/${src}`;
+                }
+            }
+        });
+
+        // Extract text content (maybe first 200 chars)
+        // Heuristic: Remove scripts, styles, and grab text
+        $('script').remove();
+        $('style').remove();
+        const text = $('body').text().replace(/\s+/g, ' ').trim().substring(0, 200);
+
+        return {
+            imageUrl,
+            description: text
+        };
+
+    } catch (error) {
+        console.error("Error fetching detail:", error);
+        return null;
+    }
+}
