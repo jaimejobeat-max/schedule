@@ -36,6 +36,9 @@ export default function Calendar() {
     const [initialView, setInitialView] = useState("dayGridMonth");
 
     const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+    const [filterMode, setFilterMode] = useState<'all' | 'schedule' | 'special' | 'provisional'>('schedule');
+
+    const TARGET_SYMBOLS = ["*", "**", "***", "^", "^^", "^^^"];
 
     useEffect(() => {
         // Detect mobile and set initial view to list
@@ -54,10 +57,10 @@ export default function Calendar() {
         return () => clearInterval(interval);
     }, []);
 
-    // Effect to refetch events when filter changes
+    // Effect to refetch events when filter or mode changes
     useEffect(() => {
         calendarRef.current?.getApi().refetchEvents();
-    }, [selectedBranch]);
+    }, [selectedBranch, filterMode]);
 
     // Fetch events function for FullCalendar
     const fetchEvents = async (info: any, successCallback: any, failureCallback: any) => {
@@ -69,12 +72,33 @@ export default function Calendar() {
                 },
             });
 
-            let mappedEvents = response.data.map((evt: any) => ({
-                ...evt,
-                backgroundColor: BRANCH_COLORS[evt.extendedProps.boardId] || "#cccccc",
-                borderColor: BRANCH_COLORS[evt.extendedProps.boardId] || "#cccccc",
-                textColor: "#000000", // Dark text for pastel background
-            }));
+            let mappedEvents = response.data
+                .filter((evt: any) => {
+                    if (filterMode === 'all') return true; // Show everything
+
+                    const fullTitle = evt.title || "";
+                    // Clean title: Remove [BranchName] prefix and trim
+                    // Regex to remove [Anything] at the start
+                    const content = fullTitle.replace(/^\[[^\]]+\]\s*/, "").trim();
+
+                    const isSpecial = TARGET_SYMBOLS.includes(content);
+                    const isProvisional = content.includes("++");
+
+                    if (filterMode === 'special') {
+                        return isSpecial;
+                    } else if (filterMode === 'provisional') {
+                        return isProvisional;
+                    } else {
+                        // schedule mode: Exclude both special and provisional
+                        return !isSpecial && !isProvisional;
+                    }
+                })
+                .map((evt: any) => ({
+                    ...evt,
+                    backgroundColor: BRANCH_COLORS[evt.extendedProps.boardId] || "#cccccc",
+                    borderColor: BRANCH_COLORS[evt.extendedProps.boardId] || "#cccccc",
+                    textColor: "#000000", // Dark text for pastel background
+                }));
 
             // Filter logic
             if (selectedBranch) {
@@ -98,50 +122,94 @@ export default function Calendar() {
     return (
         <div className="p-4 md:p-6 bg-white/30 backdrop-blur-md border border-white/20 rounded-2xl shadow-xl">
             {/* Header: Legend + Link Button */}
-            <div className="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                {/* Legend (Filter Buttons) */}
-                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                    <button
-                        onClick={() => setSelectedBranch(null)}
-                        className={`px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 text-xs font-bold tracking-wide ${selectedBranch === null
-                            ? "bg-gray-800 text-white border-gray-800 scale-105"
-                            : "bg-white/50 text-gray-600 border-white/40 hover:bg-white/80"
-                            }`}
-                    >
-                        ALL
-                    </button>
-                    {Object.entries(BRANCH_COLORS).map(([id, color]) => (
+            <div className="mb-6 flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                    {/* Combined Filters (Mode + Branch) */}
+                    <div className="flex flex-wrap gap-2 justify-center md:justify-start items-center">
+                        {/* 1. ALL Button */}
                         <button
-                            key={id}
-                            onClick={() => setSelectedBranch(selectedBranch === id ? null : id)}
-                            className={`flex items-center gap-1 px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 ${selectedBranch === id ? "ring-2 ring-offset-1 ring-gray-400 scale-105" : "hover:opacity-80"
+                            onClick={() => {
+                                setSelectedBranch(null);
+                                setFilterMode('all');
+                            }}
+                            className={`px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 text-xs font-bold tracking-wide ${filterMode === 'all' && selectedBranch === null
+                                ? "bg-gray-800 text-white border-gray-800 scale-105"
+                                : "bg-white/50 text-gray-600 border-white/40 hover:bg-white/80"
+                                }`}
+                        >
+                            ALL
+                        </button>
+
+                        {/* 2. Schedule Button */}
+                        <button
+                            onClick={() => setFilterMode('schedule')}
+                            className={`px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 text-xs font-bold tracking-wide ${filterMode === 'schedule'
+                                ? "bg-gray-800 text-white border-gray-800 scale-105"
+                                : "bg-white/50 text-gray-600 border-white/40 hover:bg-white/80"
+                                }`}
+                        >
+                            Schedule
+                        </button>
+
+                        {/* 3. Special Button */}
+                        <button
+                            onClick={() => setFilterMode('special')}
+                            className={`px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 text-xs font-bold tracking-wide ${filterMode === 'special'
+                                ? "bg-gray-800 text-white border-gray-800 scale-105"
+                                : "bg-white/50 text-gray-600 border-white/40 hover:bg-white/80"
+                                }`}
+                        >
+                            답사 & 특이사항
+                        </button>
+
+                        {/* 4. Provisional Button (Moved before branches) */}
+                        <button
+                            onClick={() => setFilterMode('provisional')}
+                            className={`px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 text-xs font-bold tracking-wide ${filterMode === 'provisional'
+                                ? "bg-gray-800 text-white border-gray-800 scale-105"
+                                : "bg-white/50 text-gray-600 border-white/40 hover:bg-white/80"
                                 }`}
                             style={{
-                                backgroundColor: color,
-                                borderColor: "rgba(255,255,255,0.4)",
-                                opacity: selectedBranch && selectedBranch !== id ? 0.4 : 1,
+                                backgroundColor: filterMode === 'provisional' ? undefined : '#FFB7B2',
                             }}
                         >
-                            <span className="text-xs font-bold text-gray-800 tracking-wide">{BRANCH_NAMES[id]}</span>
+                            가부킹
                         </button>
-                    ))}
-                </div>
 
-                {/* Right Link Button */}
-                <div className="flex-shrink-0">
-                    <a
-                        href="https://raysoda.cafe24.com/zeroboard/zboard.php?id=hong_schedule"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center px-4 py-2 text-sm font-bold text-gray-700 rounded-lg shadow-sm border border-white/40 transition-all duration-200 hover:opacity-80 active:scale-95"
-                        style={{
-                            backgroundColor: '#A0C4FF', // Pastel Blue
-                            height: '2.5rem', // Match standard button height
-                            fontSize: '0.875rem', // Match standard button font size
-                        }}
-                    >
-                        hongdae ↗
-                    </a>
+                        {/* 5. Branch Buttons */}
+                        {Object.entries(BRANCH_COLORS).map(([id, color]) => (
+                            <button
+                                key={id}
+                                onClick={() => setSelectedBranch(selectedBranch === id ? null : id)}
+                                className={`flex items-center gap-1 px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 ${selectedBranch === id ? "ring-2 ring-offset-1 ring-gray-400 scale-105" : "hover:opacity-80"
+                                    }`}
+                                style={{
+                                    backgroundColor: color,
+                                    borderColor: "rgba(255,255,255,0.4)",
+                                    opacity: selectedBranch && selectedBranch !== id ? 0.4 : 1,
+                                }}
+                            >
+                                <span className="text-xs font-bold text-gray-800 tracking-wide">{BRANCH_NAMES[id]}</span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Right Link Button */}
+                    <div className="flex-shrink-0">
+                        <a
+                            href="https://raysoda.cafe24.com/zeroboard/zboard.php?id=hong_schedule"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center px-4 py-2 text-sm font-bold text-gray-700 rounded-lg shadow-sm border border-white/40 transition-all duration-200 hover:opacity-80 active:scale-95"
+                            style={{
+                                backgroundColor: '#A0C4FF', // Pastel Blue
+                                height: '2.5rem', // Match standard button height
+                                fontSize: '0.875rem', // Match standard button font size
+                            }}
+                        >
+                            hongdae ↗
+                        </a>
+                    </div>
                 </div>
             </div>
 
