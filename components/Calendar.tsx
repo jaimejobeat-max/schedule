@@ -36,7 +36,7 @@ export default function Calendar() {
     const [initialView, setInitialView] = useState("dayGridMonth");
 
     const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
-    const [filterMode, setFilterMode] = useState<'all' | 'schedule' | 'special' | 'provisional'>('schedule');
+    const [filterMode, setFilterMode] = useState<'all' | 'schedule' | 'special' | 'provisional' | 'wedding'>('schedule');
 
     const TARGET_SYMBOLS = ["*", "**", "***", "^", "^^", "^^^"];
 
@@ -83,14 +83,22 @@ export default function Calendar() {
 
                     const isSpecial = TARGET_SYMBOLS.includes(content);
                     const isProvisional = content.includes("++");
+                    const isWedding = content.includes("(WED)");
+
+                    // If it's hong_schedule, ONLY show it if it's a wedding event
+                    if (evt.extendedProps.boardId === 'hong_schedule' && !isWedding) {
+                        return false;
+                    }
 
                     if (filterMode === 'special') {
                         return isSpecial;
                     } else if (filterMode === 'provisional') {
                         return isProvisional;
+                    } else if (filterMode === 'wedding') {
+                        return isWedding;
                     } else {
-                        // schedule mode: Exclude both special and provisional
-                        return !isSpecial && !isProvisional;
+                        // schedule mode: Exclude special, provisional, and wedding
+                        return !isSpecial && !isProvisional && !isWedding;
                     }
                 })
                 .map((evt: any) => ({
@@ -162,15 +170,26 @@ export default function Calendar() {
                             답사 & 특이사항
                         </button>
 
-                        {/* 4. Provisional Button (Moved before branches) */}
+                        {/* 4. Wedding Button */}
+                        <button
+                            onClick={() => setFilterMode('wedding')}
+                            className={`px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 text-xs font-bold tracking-wide ${filterMode === 'wedding'
+                                ? "bg-gray-800 text-white border-gray-800 scale-105"
+                                : "bg-white/50 text-gray-600 border-white/40 hover:bg-white/80"
+                                }`}
+                        >
+                            웨딩
+                        </button>
+
+                        {/* 5. Provisional Button (Moved before branches) */}
                         <button
                             onClick={() => setFilterMode('provisional')}
                             className={`px-3 py-1.5 rounded-full border shadow-sm transition-all duration-200 text-xs font-bold tracking-wide ${filterMode === 'provisional'
                                 ? "bg-gray-800 text-white border-gray-800 scale-105"
-                                : "bg-white/50 text-gray-600 border-white/40 hover:bg-white/80"
+                                : "bg-white text-gray-600 border-white/40 hover:bg-white/80"
                                 }`}
                             style={{
-                                backgroundColor: filterMode === 'provisional' ? undefined : '#FFB7B2',
+                                backgroundColor: filterMode === 'provisional' ? undefined : '#FFFFFF',
                             }}
                         >
                             가부킹

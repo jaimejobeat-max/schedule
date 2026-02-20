@@ -13,6 +13,7 @@ const BOARDS = [
     'Layer27',
     'Layer11',
     'Layerhannam',
+    'hong_schedule',
 ];
 
 interface ScheduleEvent {
@@ -175,7 +176,7 @@ export async function fetchSchedules(year: number, month: number) {
 
                         allEvents.push({
                             id: `${boardId}-${no}`,
-                            title: `[${boardId.replace(/Layer/i, '').replace('hannam', 'Hannam')}] ${title}`,
+                            title: `[${boardId.replace(/Layer/i, '').replace('hannam', 'Hannam').replace('hong_schedule', 'hongdae')}] ${title}`,
                             start: dateStr,
                             url: `https://${HOST}${BASE_PATH}/${viewHref}`,
                             extendedProps: { boardId },
